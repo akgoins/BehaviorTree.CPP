@@ -709,10 +709,17 @@ void BT::XMLParser::Pimpl::recursivelyCreateTree(const std::string& tree_ID,
         }
         else
         {
-            for (auto child_element = element->FirstChildElement(); child_element;
+            std::vector< const BT_TinyXML2::XMLElement* > element_array;
+            for (const BT_TinyXML2::XMLElement* child_element = element->FirstChildElement(); child_element;
                  child_element = child_element->NextSiblingElement())
             {
-                recursiveStep(node, child_element);
+                element_array.push_back(child_element);
+            }
+
+#pragma omp parallel for
+            for(unsigned int i = 0; i < element_array.size(); ++i)
+            {
+                recursiveStep(node, element_array[i]);
             }
         }
     };

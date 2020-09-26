@@ -9,6 +9,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CONFIG_PATH}")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_compile_options(-fopenmp)
+
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
@@ -30,6 +32,11 @@ if(Boost_FOUND)
     endif()
 endif()
 
+find_package(OpenMP REQUIRED)
+if(OPENMP_FOUND)
+  set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+endif()
+
 if(NOT DEFINED BT_COROUTINES)
     message(STATUS "Coroutines disabled. Install Boost to enable them (version 1.59+ recommended).")
     add_definitions(-DBT_NO_COROUTINES)
@@ -39,7 +46,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #---- project configuration ----
 option(BUILD_EXAMPLES   "Build tutorials and examples" ON)
-option(BUILD_UNIT_TESTS "Build the unit tests" ON)
+option(BUILD_UNIT_TESTS "Build the unit tests" OFF)
 option(BUILD_TOOLS "Build commandline tools" ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
@@ -208,7 +215,7 @@ if( ZMQ_FOUND )
 endif()
 
 target_link_libraries(${BEHAVIOR_TREE_LIBRARY} PUBLIC
-    ${BEHAVIOR_TREE_EXTERNAL_LIBRARIES})
+    ${BEHAVIOR_TREE_EXTERNAL_LIBRARIES} ${OpenMP_LIBRARIES} ${OpenMP_FLAGS})
 
 target_compile_definitions(${BEHAVIOR_TREE_LIBRARY} PRIVATE $<$<CONFIG:Debug>:TINYXML2_DEBUG>)
 
